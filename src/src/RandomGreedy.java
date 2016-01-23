@@ -7,15 +7,20 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 public class RandomGreedy {
 	
+	static int K=10;
 	static Connection conn = null;
 	static String day;
 	static double alpha = 0.15;
@@ -39,6 +44,7 @@ public class RandomGreedy {
 	static HashMap<String, Integer> locNumMap = new HashMap<String, Integer>();
 	static HashMap<String, Integer> locConnNumMap = new HashMap<String, Integer>();
 	
+	static ArrayList<String> true_label = new ArrayList<String>();
 	static Map<String, Integer> province = new HashMap<String, Integer>();
 	static ArrayList<String> S_star = new ArrayList<String>();
 	static ArrayList<Double> F2   = new ArrayList<Double>();
@@ -134,6 +140,16 @@ public class RandomGreedy {
 				pvalue = prs.getDouble("pvalue");
 				pdv[k2i.get(keyword)][u2i.get(user)] = pvalue;
 			}
+			
+			sql = "select province from true_value where date = '"+ day +"';"; 
+			prs = stmt.executeQuery(sql);
+			String prov;
+			while(prs.next()){
+				prov = prs.getString("province");
+				System.out.println(">>> "+prov);
+				true_label.add(prov);
+				
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -206,8 +222,10 @@ public class RandomGreedy {
 		do {
 			System.out.println("r = "+r);
 			r = r + 1;
-			S1rt.clear();S1rt.addAll(S1r);
-			S2rt.clear();S2rt.addAll(S2r);
+			S1rt.clear();
+			S1rt.addAll(S1r);
+			S2rt.clear();
+			S2rt.addAll(S2r);
 			randomPermutation();
 			
 			FY = f2(S1rt, S2rt);// will be use in function M and G
@@ -222,7 +240,8 @@ public class RandomGreedy {
 				// there is a little different from the theory to reduce the complexity, cause (add keyword to user set)=0, (add user to keyword set)=0
 				if (isUser(e)) {// there are only numbers in e, indicate that it's a user
 					double x = f(S1r, S2r, S1rt, S2rt);
-					t.clear();t.addAll(S1r);
+					t.clear();
+					t.addAll(S1r);
 					t.add(e);
 					double y = f(t, S2r, S1rt, S2rt);
 					x = y - x;
@@ -290,6 +309,7 @@ public class RandomGreedy {
 		}
 		if(i%5!=0)
 			System.out.println();
+		province=sortByValue(province);
 		Set<Entry<String, Integer>> entries = province.entrySet();
 		Iterator<Entry<String, Integer>> iter = entries.iterator();
 		
@@ -343,9 +363,9 @@ public class RandomGreedy {
 		double x = 0;
 		int method = 0;
 		switch(method) {
-		case 0: x = G0(S1, S2, S1rt, S2rt) + FY - GYY; break;
-		case 1: x = FY - G1(S1, S2, S1rt, S2rt); break;
-		case 2: x = FY + G2(S1, S2, S1rt, S2rt); break;
+		case 0: x = FY + G0(S1, S2, S1rt, S2rt)  - GYY; break;
+		case 1: x = FY - G1(S1, S2, S1rt, S2rt) - GYY; break;
+		case 2: x = FY + G2(S1, S2, S1rt, S2rt) - GYY; break;
 		}
 		
 		return x;
@@ -358,11 +378,15 @@ public class RandomGreedy {
 			String e = S1.get(i);
 			if (S1rt.contains(e)) {
 				x += FV;
-				t.clear();t.addAll(V1);t.remove(e);
+				t.clear();
+				t.addAll(V1);
+				t.remove(e);
 				x -= f2(t, V2);
 			}
 			else {
-				t.clear();t.addAll(S1rt);t.add(e);
+				t.clear();
+				t.addAll(S1rt);
+				t.add(e);
 				x += f2(t, S2rt);
 				x -= FY;
 			}
@@ -371,11 +395,15 @@ public class RandomGreedy {
 			String e = S2.get(i);
 			if (S2rt.contains(e)) {
 				x += FV;
-				t.clear();t.addAll(V2);t.remove(e);
+				t.clear();
+				t.addAll(V2);
+				t.remove(e);
 				x -= f2(V1, t);
 			}
 			else {
-				t.clear();t.addAll(S2rt);t.add(e);
+				t.clear();
+				t.addAll(S2rt);
+				t.add(e);
 				x += f2(S1rt, t);
 				x -= FY;
 			}
@@ -547,7 +575,65 @@ public class RandomGreedy {
 		}
 		return true;
 	}
+	
+	public static ArrayList<Double> pre_recall(){
+		ArrayList<Double> pre_rec_fscore=new ArrayList<Double>();
+		ArrayList<String> result_prov_List=new ArrayList<String>();
+		Double rel_ret=0.0;
+		Set<Entry<String, Integer>> entries = province.entrySet();
+		Iterator<Entry<String, Integer>> iter = entries.iterator();
+		
+		while(iter.hasNext()) {
+			Entry entry = iter.next();
+			result_prov_List.add((String) entry.getKey());
+		}	
+		rel_ret=interesect(true_label,result_prov_List);
+		if(rel_ret==0){
+			rel_ret=0.000001;
+		}
+		//[0]recall,[1]precision,[3]fscore
+		double rec,pre,fscore;
+		rec=rel_ret/province.size()*1.0;
+		pre=rel_ret/true_label.size()*1.0;
+		fscore=(rec*rec)/(rec+pre);
+		System.out.println("Recall:"+rec+"\nPrecision:"+pre+"\nF-Score:"+fscore);
+		pre_rec_fscore.add(rec);
+		pre_rec_fscore.add(pre);
+		pre_rec_fscore.add(fscore);
+		return pre_rec_fscore;
+	}
+	private  static Double interesect(ArrayList<String> f, ArrayList<String> s) { 
+	    ArrayList<String> res = new ArrayList<String>();
 
+	    Double int_len=0.0;
+	    for(int i=0;i<f.size();i++)
+	    	for(int j=0;j<s.size();j++){
+	    		if(f.get(i).compareTo(s.get(j))==0){
+	    			int_len++;
+	    		}
+	    	}
+
+
+	    return int_len; 
+	}
+	static Map sortByValue(Map map) {
+	     List list = new LinkedList(map.entrySet());
+	     Collections.sort(list, new Comparator() {
+	          public int compare(Object o1, Object o2) {
+	               return -((Comparable) ((Map.Entry) (o1)).getValue())
+	              .compareTo(((Map.Entry) (o2)).getValue());
+	          }
+	     });
+
+	    Map result = new LinkedHashMap();
+	    for (Iterator it = list.iterator(); it.hasNext();) {
+	        Map.Entry entry = (Map.Entry)it.next();
+	        result.put(entry.getKey(), entry.getValue());
+	    }
+	    return result;
+	}
+	
+	
 	public static void main(String[] args) {
 		Date d0 = new Date(114,9,20);//the day before the beginning day, with format "(year-1900, month-1, date)"
 		Date dn = new Date(114,9,21);//the day after the ending day
@@ -567,6 +653,8 @@ public class RandomGreedy {
 			
 		} while(date.before(dn) && date.after(d0));
 		DrawPlot.draw(F, F_Low,F2, F2_Up);
+		System.out.println(true_label.toString());
+		pre_recall();
 	}
 
 }
