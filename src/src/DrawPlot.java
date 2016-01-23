@@ -74,11 +74,11 @@ public class DrawPlot extends ApplicationFrame {
      *
      * @param title  the frame title.
      */
-    public DrawPlot(final String title,ArrayList<Double> F2,ArrayList<Double> F2_up) {
+    public DrawPlot(final String title,ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up) {
 
         super(title);
 
-        final XYDataset dataset = createDataset(F2,F2_up);
+        final XYDataset dataset = createDataset(F,F_low,F2,F2_up);
         final JFreeChart chart = createChart(dataset);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
@@ -91,15 +91,23 @@ public class DrawPlot extends ApplicationFrame {
      * 
      * @return a sample dataset.
      */
-    private XYDataset createDataset(ArrayList<Double> F2,ArrayList<Double> F2_up) {
+    private XYDataset createDataset(ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up) {
         
-        final XYSeries series1 = new XYSeries("F");
-        for(int i=0;i<F2.size();i++)
-        	series1.add(i, F2.get(i));
+    	final XYSeries series1 = new XYSeries("F");
+        for(int i=0;i<F.size();i++)
+        	series1.add(i, F.get(i));
         
         final XYSeries series2 = new XYSeries("F_low");
+        for(int i=0;i<F_low.size();i++)
+        	series2.add(i, F_low.get(i));
+        
+        final XYSeries series3 = new XYSeries("F2");
+        for(int i=0;i<F2.size();i++)
+        	series3.add(i, F2.get(i));
+        
+        final XYSeries series4 = new XYSeries("F2_up");
         for(int i=0;i<F2_up.size();i++)
-        	series2.add(i, F2_up.get(i));
+        	series4.add(i, F2_up.get(i));
         
         
 
@@ -107,7 +115,8 @@ public class DrawPlot extends ApplicationFrame {
         final XYSeriesCollection dataset = new XYSeriesCollection();
         dataset.addSeries(series1);
         dataset.addSeries(series2);
-        
+        dataset.addSeries(series3);
+        dataset.addSeries(series4);
         return dataset;
         
     }
@@ -123,9 +132,9 @@ public class DrawPlot extends ApplicationFrame {
         
         // create the chart...
         final JFreeChart chart = ChartFactory.createXYLineChart(
-            "F2 and F2_up",      // chart title
-            "Top ith Doc",                      // x axis label
-            "Realted Scores",                      // y axis label
+            "F2 function and upper bound",      // chart title
+            "iteration",                      // x axis label
+            "Score",                      // y axis label
             dataset,                  // data
             PlotOrientation.VERTICAL,
             true,                     // include legend
@@ -141,7 +150,7 @@ public class DrawPlot extends ApplicationFrame {
         
         // get a reference to the plot for further customisation...
         final NumberAxis domainAxis = new NumberAxis("X-Axis");
-        domainAxis.setRange(0.0,101.00);
+        //domainAxis.setRange(0.0,101.00);
         domainAxis.setTickUnit(new NumberTickUnit(1.0));
         final NumberAxis rangeAxis = new NumberAxis("Y-Axis");
         rangeAxis.setRange(0.00,1.20);
@@ -183,9 +192,9 @@ public class DrawPlot extends ApplicationFrame {
      *
      * @param args  ignored.
      */
-    public static void draw(ArrayList<Double> F2,ArrayList<Double> F2_up){
+    public static void draw(ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up){
         
-        final DrawPlot demo = new DrawPlot("Line Chart Demo 6",F2,F2_up);
+        final DrawPlot demo = new DrawPlot("Line Chart Demo 6",F,F_low,F2,F2_up);
         demo.pack();
         RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);

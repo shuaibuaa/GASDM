@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class RandomGreedy {
 	
@@ -36,7 +38,9 @@ public class RandomGreedy {
 	static HashMap<String, String> locMap = new HashMap<String, String>();
 	static HashMap<String, Integer> locNumMap = new HashMap<String, Integer>();
 	static HashMap<String, Integer> locConnNumMap = new HashMap<String, Integer>();
-
+	
+	static Map<String, Integer> province = new HashMap<String, Integer>();
+	static ArrayList<String> S_star = new ArrayList<String>();
 	static ArrayList<Double> F2   = new ArrayList<Double>();
 	static ArrayList<Double> F2_Up= new ArrayList<Double>(); 
 	static ArrayList<Double> F   = new ArrayList<Double>();
@@ -78,7 +82,7 @@ public class RandomGreedy {
 	 * need to initial your Database's "user" and "password"
 	 */
 	private static void initDB(){
-		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=&useUnicode=true&characterEncoding=UTF8";
+		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=123456&useUnicode=true&characterEncoding=UTF8";
 		try {  
 			Class.forName("com.mysql.jdbc.Driver");  
 			conn = DriverManager.getConnection(url);
@@ -192,12 +196,13 @@ public class RandomGreedy {
 	//greedy algorithm
 	private static void greedy() {
 		int r = 1;
+		int index=0;
 		FV = f2(V1,V2); // will be use in function G, to reduce the complexity
 		random.addAll(V1);
 		random.addAll(V2);
 		S2r.add("wumai");
 		random.remove("wumai");
-		int index = 0;
+		
 		do {
 			System.out.println("r = "+r);
 			r = r + 1;
@@ -206,7 +211,7 @@ public class RandomGreedy {
 			randomPermutation();
 			
 			FY = f2(S1rt, S2rt);// will be use in function M and G
-			GYY = G2(S1rt, S2rt, S1rt, S2rt);// will be use in function G, (S1t for S1(t-1) and S2t for S2(t-1), refers to the result sets of last iteration)
+			GYY = G0(S1rt, S2rt, S1rt, S2rt);// will be use in function G, (S1t for S1(t-1) and S2t for S2(t-1), refers to the result sets of last iteration)
 			
 //			System.out.println("original "+r+" score: "+ (f1(S1rt, S2rt)- f2(S1rt, S2rt)+penalty(S1rt)));
 //			System.out.println("begin " +r+" lower bound score: "+ (f1(S1rt, S2rt)- M(S1rt, S2rt, S1rt, S2rt)+penalty(S1rt)));
@@ -266,6 +271,14 @@ public class RandomGreedy {
 		// when converge, print the result user set to console
 		int i;
 		for (i=0; i<S1r.size(); i++) {
+			String prov=userLocMap.get(S1r.get(i));
+			if(province.containsKey(prov)){
+				Integer temp=province.get(prov)+1;
+				province.put(prov,temp+1);
+			}else{
+				province.put(prov,1);
+			}
+			
 			System.out.print(userLocMap.get(S1r.get(i)));
 			if(i%5==4)
 				System.out.println();
@@ -277,6 +290,13 @@ public class RandomGreedy {
 		}
 		if(i%5!=0)
 			System.out.println();
+		Set<Entry<String, Integer>> entries = province.entrySet();
+		Iterator<Entry<String, Integer>> iter = entries.iterator();
+		
+		while(iter.hasNext()) {
+			Entry entry = iter.next();
+			System.out.println(entry.getKey() + ": " + entry.getValue());
+		}	
 	}
 	
 	// shuffle the unchosen element to take the next iteration
@@ -321,7 +341,7 @@ public class RandomGreedy {
 	// MF2 = GY(S)+F2(Y)-GY(Y)
 	private static double M(ArrayList<String> S1, ArrayList<String> S2, ArrayList<String> S1rt, ArrayList<String> S2rt) {
 		double x = 0;
-		int method = 2;
+		int method = 0;
 		switch(method) {
 		case 0: x = G0(S1, S2, S1rt, S2rt) + FY - GYY; break;
 		case 1: x = FY - G1(S1, S2, S1rt, S2rt); break;
@@ -543,8 +563,10 @@ public class RandomGreedy {
 			System.out.println("Year: "+date.getYear()+" Month: "+date.getMonth()+" Date: "+date.getDate());
 			System.out.println();
 			randomGreedy(date);
-			DrawPlot.draw(F, F_Low, F2, F2_Up);
+			
+			
 		} while(date.before(dn) && date.after(d0));
+		DrawPlot.draw(F, F_Low,F2, F2_Up);
 	}
 
 }
