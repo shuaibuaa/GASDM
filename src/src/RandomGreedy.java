@@ -414,7 +414,10 @@ public class RandomGreedy {
 		double x = 0;
 		ArrayList<String> t = new ArrayList<String>();
 		ArrayList<String> s = new ArrayList<String>();
-		s.addAll(S1rt);s.addAll(S2rt);s.removeAll(S1);s.removeAll(S2);
+		s.addAll(S1rt);
+		s.addAll(S2rt);
+		s.removeAll(S1);
+		s.removeAll(S2);
 		for (int i=0; i<s.size(); i++) {
 			String e = s.get(i);
 			if (isUser(e)) {
@@ -428,7 +431,11 @@ public class RandomGreedy {
 				x -= f2(S1rt, t);
 			}
 		}
-		s.clear();s.addAll(S1);s.addAll(S2);s.removeAll(S1rt);s.removeAll(S2rt);
+		s.clear();
+		s.addAll(S1);
+		s.addAll(S2);
+		s.removeAll(S1rt);
+		s.removeAll(S2rt);
 		ArrayList<String> empty = new ArrayList<String>();
 		empty.clear();
 		for (int i=0; i<s.size(); i++) {
@@ -646,14 +653,14 @@ public class RandomGreedy {
 		// do random greedy every day
 		do { 
 			date.setTime(date.getTime()+1000*3600*24);
-			System.out.println("Year: "+date.getYear()+" Month: "+date.getMonth()+" Date: "+date.getDate());
+			System.out.println("Year: "+(1901+date.getYear())+" Month: "+(date.getMonth()+1)+" Date: "+date.getDate());
 			System.out.println();
 			randomGreedy(date);
 			
 			
 		} while(date.before(dn) && date.after(d0));
 		DrawPlot.draw(F, F_Low,F2, F2_Up);
-		System.out.println(true_label.toString());
+		System.out.println("True subset: "+true_label.toString());
 		pre_recall();
 	}
 
