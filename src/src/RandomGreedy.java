@@ -16,14 +16,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
 import java.util.Set;
 
 public class RandomGreedy {
 	
-	static int K=10;
-	static Connection conn = null;
 	static String day;
+	static int G_method = 2;
+	static int K = 10;
 	static double alpha = 0.15;
+	static double lambda = 0.015;
+	
+	static Connection conn = null;
 	static double score;
 	static double lastscore;
 	static double[][] pdv;
@@ -52,18 +56,18 @@ public class RandomGreedy {
 	static ArrayList<Double> F   = new ArrayList<Double>();
 	static ArrayList<Double> F_Low= new ArrayList<Double>();
 
-	public static void randomGreedy(Date date) {
-		init(date);
+//	public static void randomGreedy(Date date) {
+	public static void randomGreedy() {
+//		init(date);
+		init();
 		greedy();
 	}
 	
-	private static void init(Date date) {
-		//init day
-		initDate(date);
-		//init V1,V2,userlocMap,pdv
-		initV();
-		//init locNumMap
-		initLocNumMap();
+//	private static void init(Date date) {
+	private static void init() {
+//		initDate(date);//init day
+		initV();//init V1,V2,userlocMap,pdv
+		initLocNumMap();//init locNumMap
 	}
 	
 	private static void initDate(Date date) {
@@ -216,8 +220,6 @@ public class RandomGreedy {
 		FV = f2(V1,V2); // will be use in function G, to reduce the complexity
 		random.addAll(V1);
 		random.addAll(V2);
-		S2r.add("wumai");
-		random.remove("wumai");
 		
 		do {
 			System.out.println("r = "+r);
@@ -229,11 +231,11 @@ public class RandomGreedy {
 			randomPermutation();
 			
 			FY = f2(S1rt, S2rt);// will be use in function M and G
-			GYY = G0(S1rt, S2rt, S1rt, S2rt);// will be use in function G, (S1t for S1(t-1) and S2t for S2(t-1), refers to the result sets of last iteration)
-			
-//			System.out.println("original "+r+" score: "+ (f1(S1rt, S2rt)- f2(S1rt, S2rt)+penalty(S1rt)));
-//			System.out.println("begin " +r+" lower bound score: "+ (f1(S1rt, S2rt)- M(S1rt, S2rt, S1rt, S2rt)+penalty(S1rt)));
-			
+			switch(G_method) {// will be use in function G
+			case 0: GYY = G0(S1rt, S2rt, S1rt, S2rt); break;
+			case 1: GYY = G1(S1rt, S2rt, S1rt, S2rt); break;
+			case 2: GYY = G2(S1rt, S2rt, S1rt, S2rt); break;
+			}
 			for (int i=0; i<random.size(); i++) {
 				ArrayList<String> t = new ArrayList<String>();
 				String e = random.get(i);
@@ -282,8 +284,6 @@ public class RandomGreedy {
 					}
 				}
 			}
-//			System.out.println("S1 size: " + S1r.size() + "\tS2 size: "+S2r.size());
-//			System.out.println("end "+r+" lower bound score: "+ score);
 			System.out.println();
 			
 		} while (!(compare(S1r, S1rt) && compare(S2r, S2rt)));
@@ -362,13 +362,11 @@ public class RandomGreedy {
 	// MF2 = GY(S)+F2(Y)-GY(Y)
 	private static double M(ArrayList<String> S1, ArrayList<String> S2, ArrayList<String> S1rt, ArrayList<String> S2rt) {
 		double x = 0;
-		int method = 0;
-		switch(method) {
+		switch(G_method) {
 		case 0: x = FY + G0(S1, S2, S1rt, S2rt)  - GYY; break;
 		case 1: x = FY - G1(S1, S2, S1rt, S2rt) - GYY; break;
 		case 2: x = FY + G2(S1, S2, S1rt, S2rt) - GYY; break;
 		}
-		
 		return x;
 	}
 	
@@ -570,7 +568,7 @@ public class RandomGreedy {
 				}
 			}
 		}
-		x = (double)count/100; // this number is the parameter, we can vary it to find better results
+		x = (double)count * lambda; // this number is the parameter, we can vary it to find better results
 		
 		return -x;
 	}
@@ -605,7 +603,7 @@ public class RandomGreedy {
 		if(rel_ret==0){
 			rel_ret=0.000001;
 		}
-		//[0]recall,[1]precision,[3]fscore
+		//[0]recall,[1]precision,[2]fscore
 		double rec,pre,fscore;
 		rec=rel_ret/province.size()*1.0;
 		pre=rel_ret/true_label.size()*1.0;
@@ -626,8 +624,6 @@ public class RandomGreedy {
 	    			int_len++;
 	    		}
 	    	}
-
-
 	    return int_len; 
 	}
 	static Map sortByValue(Map map) {
@@ -649,23 +645,38 @@ public class RandomGreedy {
 	
 	
 	public static void main(String[] args) {
-		Date d0 = new Date(114,9,20);//the day before the beginning day, with format "(year-1900, month-1, date)"
-		Date dn = new Date(114,9,21);//the day after the ending day
-		Date date = new Date(114,9,20);
-		date.setTime(d0.getTime());
+		System.out.println("date(2014-04-12~2015-01-11), G#(0,1,2), K(int), alpha(0~1), lambda(0~1). "
+				+ "Sample: 2014-10-21,2,10,0.15,0.015");
+		Scanner in = new Scanner(System.in);
+		String input = in.nextLine();
+		String[] inputs = input.split("\\,");
+
+		day = inputs[0];
+		G_method = Integer.parseInt(inputs[1]);
+		K = Integer.parseInt(inputs[2]);
+		alpha = Double.parseDouble(inputs[3]);
+		lambda = Double.parseDouble(inputs[4]);
 		//link database
 		initDB();
 		//init locMap
 		initLocMap();
-		// do random greedy every day
-		do { 
-			date.setTime(date.getTime()+1000*3600*24);
-			System.out.println("Year: "+(1901+date.getYear())+" Month: "+(date.getMonth()+1)+" Date: "+date.getDate());
-			System.out.println();
-			randomGreedy(date);
-			
-			
-		} while(date.before(dn) && date.after(d0));
+		randomGreedy();
+
+//		Date d0 = new Date(114,9,20);//the day before the beginning day, with format "(year-1900, month-1, date)"
+//		Date dn = new Date(114,9,21);//the day after the ending day
+//		Date date = new Date(114,9,20);
+//		date.setTime(d0.getTime());
+//		//link database
+//		initDB();
+//		//init locMap
+//		initLocMap();
+//		// do random greedy every day
+//		do {
+//			date.setTime(date.getTime()+1000*3600*24);
+//			System.out.println("Year: "+(1900+date.getYear())+" Month: "+(date.getMonth()+1)+" Date: "+date.getDate());
+//			System.out.println();
+//			randomGreedy(date);
+//		} while(date.before(dn) && date.after(d0));
 		DrawPlot.draw(F, F_Low,F2, F2_Up);
 		System.out.println("True subset: "+true_label.toString());
 		pre_recall();
