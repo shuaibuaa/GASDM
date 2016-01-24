@@ -293,7 +293,7 @@ public class RandomGreedy {
 		for (i=0; i<S1r.size(); i++) {
 			String prov=userLocMap.get(S1r.get(i));
 			if(province.containsKey(prov)){
-				Integer temp=province.get(prov)+1;
+				Integer temp=province.get(prov);
 				province.put(prov,temp+1);
 			}else{
 				province.put(prov,1);
@@ -591,30 +591,26 @@ public class RandomGreedy {
 		
 		int count=0;
 		while(iter.hasNext()) {
-			if(count>=K){ 
-				break;
-				}else{
 			Entry entry = iter.next();
-			result_prov_List.add((String) entry.getKey());
-			count++;
-			}
+			if((int)entry.getValue()>=K)
+				result_prov_List.add((String) entry.getKey());
 		}	
 		rel_ret=interesect(true_label,result_prov_List);
-		if(rel_ret==0){
-			rel_ret=0.000001;
-		}
+//		if(rel_ret==0){
+//			rel_ret=0.000001;
+//		}
 		//[0]recall,[1]precision,[2]fscore
 		double rec,pre,fscore;
 		rec=rel_ret/province.size()*1.0;
 		pre=rel_ret/true_label.size()*1.0;
-		fscore=(rec*rec)/(rec+pre);
+		fscore = (rec+pre != 0) ? (2*rec*pre)/(rec+pre) : 0;
 		System.out.println("Recall:"+rec+"\nPrecision:"+pre+"\nF-Score:"+fscore);
 		pre_rec_fscore.add(rec);
 		pre_rec_fscore.add(pre);
 		pre_rec_fscore.add(fscore);
 		return pre_rec_fscore;
 	}
-	private  static Double interesect(ArrayList<String> f, ArrayList<String> s) { 
+	private static Double interesect(ArrayList<String> f, ArrayList<String> s) { 
 	    ArrayList<String> res = new ArrayList<String>();
 
 	    Double int_len=0.0;
@@ -626,6 +622,7 @@ public class RandomGreedy {
 	    	}
 	    return int_len; 
 	}
+	
 	static Map sortByValue(Map map) {
 	     List list = new LinkedList(map.entrySet());
 	     Collections.sort(list, new Comparator() {
@@ -643,12 +640,12 @@ public class RandomGreedy {
 	    return result;
 	}
 	
-	
 	public static void main(String[] args) {
 		System.out.println("date(2014-04-12~2015-01-11), G#(0,1,2), K(int), alpha(0~1), lambda(0~1). "
 				+ "Sample: 2014-10-21,2,10,0.15,0.015");
-		Scanner in = new Scanner(System.in);
-		String input = in.nextLine();
+//		Scanner in = new Scanner(System.in);
+//		String input = in.nextLine();
+		String input = "2014-12-10,2,5,0.12,0.015";
 		String[] inputs = input.split("\\,");
 
 		day = inputs[0];
