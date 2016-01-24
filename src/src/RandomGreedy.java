@@ -285,6 +285,7 @@ public class RandomGreedy {
 //			System.out.println("S1 size: " + S1r.size() + "\tS2 size: "+S2r.size());
 //			System.out.println("end "+r+" lower bound score: "+ score);
 			System.out.println();
+			
 		} while (!(compare(S1r, S1rt) && compare(S2r, S2rt)));
 		System.out.println("Complete!!");
 		// when converge, print the result user set to console
@@ -590,9 +591,15 @@ public class RandomGreedy {
 		Set<Entry<String, Integer>> entries = province.entrySet();
 		Iterator<Entry<String, Integer>> iter = entries.iterator();
 		
+		int count=0;
 		while(iter.hasNext()) {
+			if(count>=K){ 
+				break;
+				}else{
 			Entry entry = iter.next();
 			result_prov_List.add((String) entry.getKey());
+			count++;
+			}
 		}	
 		rel_ret=interesect(true_label,result_prov_List);
 		if(rel_ret==0){
