@@ -74,11 +74,11 @@ public class DrawPlot extends ApplicationFrame {
      *
      * @param title  the frame title.
      */
-    public DrawPlot(final String title,ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up) {
+    public DrawPlot(final String title,ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up,ArrayList<Double> F1, ArrayList<Double> Penalty) {
 
         super(title);
 
-        final XYDataset dataset = createDataset(F,F_low,F2,F2_up);
+        final XYDataset dataset = createDataset(F,F_low,F2,F2_up,F1,Penalty);
         final JFreeChart chart = createChart(dataset);
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
@@ -91,7 +91,7 @@ public class DrawPlot extends ApplicationFrame {
      * 
      * @return a sample dataset.
      */
-    private XYDataset createDataset(ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up) {
+    private XYDataset createDataset(ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up,ArrayList<Double> F1, ArrayList<Double> Penalty) {
         
     	final XYSeries series1 = new XYSeries("F");
         for(int i=0;i<F.size();i++)
@@ -109,14 +109,21 @@ public class DrawPlot extends ApplicationFrame {
         for(int i=0;i<F2_up.size();i++)
         	series4.add(i, F2_up.get(i));
         
+        final XYSeries series5 = new XYSeries("F1");
+        for(int i=0;i<F1.size();i++)
+        	series5.add(i, F1.get(i));
         
-
- 
+        final XYSeries series6 = new XYSeries("Penalty");
+        for(int i=0;i<Penalty.size();i++)
+        	series6.add(i, Penalty.get(i));
+        
         final XYSeriesCollection dataset = new XYSeriesCollection();
         dataset.addSeries(series1);
         dataset.addSeries(series2);
         dataset.addSeries(series3);
         dataset.addSeries(series4);
+        dataset.addSeries(series5);
+        dataset.addSeries(series6);
         return dataset;
         
     }
@@ -132,7 +139,7 @@ public class DrawPlot extends ApplicationFrame {
         
         // create the chart...
         final JFreeChart chart = ChartFactory.createXYLineChart(
-            "F2 function and upper bound",      // chart title
+            "Functions and upper/lower bound",      // chart title
             "iteration",                      // x axis label
             "Score",                      // y axis label
             dataset,                  // data
@@ -192,9 +199,9 @@ public class DrawPlot extends ApplicationFrame {
      *
      * @param args  ignored.
      */
-    public static void draw(ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up){
+    public static void draw(ArrayList<Double> F,ArrayList<Double> F_low,ArrayList<Double> F2,ArrayList<Double> F2_up, ArrayList<Double> F1, ArrayList<Double> Penalty){
         
-        final DrawPlot demo = new DrawPlot("Line Chart Demo 6",F,F_low,F2,F2_up);
+        final DrawPlot demo = new DrawPlot("Line Chart Demo 6",F,F_low,F2,F2_up,F1, Penalty);
         demo.pack();
         RefineryUtilities.centerFrameOnScreen(demo);
         demo.setVisible(true);

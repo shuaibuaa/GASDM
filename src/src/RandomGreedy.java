@@ -51,8 +51,10 @@ public class RandomGreedy {
 	static ArrayList<String> true_label = new ArrayList<String>();
 	static Map<String, Integer> province = new HashMap<String, Integer>();
 	static ArrayList<String> S_star = new ArrayList<String>();
+	static ArrayList<Double> F1   = new ArrayList<Double>();
 	static ArrayList<Double> F2   = new ArrayList<Double>();
 	static ArrayList<Double> F2_Up= new ArrayList<Double>(); 
+	static ArrayList<Double> Penalty= new ArrayList<Double>();
 	static ArrayList<Double> F   = new ArrayList<Double>();
 	static ArrayList<Double> F_Low= new ArrayList<Double>();
 
@@ -92,7 +94,7 @@ public class RandomGreedy {
 	 * need to initial your Database's "user" and "password"
 	 */
 	private static void initDB(){
-		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=123456&useUnicode=true&characterEncoding=UTF8";
+		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=&useUnicode=true&characterEncoding=UTF8";
 		try {  
 			Class.forName("com.mysql.jdbc.Driver");  
 			conn = DriverManager.getConnection(url);
@@ -256,8 +258,10 @@ public class RandomGreedy {
 //						System.out.println("original F2: "+ f2(S1r, S2r));
 //						System.out.println("upper bound MF2: "+ M(S1r, S2r, S1rt, S2rt) + "\t"+(M(S1r, S2r, S1rt, S2rt)>=f2(S1r, S2r)?true:false));
 //						System.out.println();
+						F1.add(f1(S1r, S2r));
 						F2.add(f2(S1r, S2r));                //F2 score
 						F2_Up.add(M(S1r, S2r, S1rt, S2rt));  //F2_upper bound
+						Penalty.add(penalty(S1r));
 						F.add((f1(S1r, S2r)- f2(S1r, S2r) + penalty(S1r)));                //F score
 						F_Low.add((f1(S1r, S2r)- M(S1r, S2r, S1rt, S2rt) + penalty(S1r))); //F_lower bound
 					}
@@ -277,8 +281,10 @@ public class RandomGreedy {
 //						System.out.println("original F2: "+ f2(S1r, S2r));
 //						System.out.println("upper bound MF2: "+ M(S1r, S2r, S1rt, S2rt) + "\t"+(M(S1r, S2r, S1rt, S2rt)>=f2(S1r, S2r)?true:false));
 //						System.out.println();
+						F1.add(f1(S1r, S2r));
 						F2.add(f2(S1r, S2r));               //F2 score
 						F2_Up.add(M(S1r, S2r, S1rt, S2rt)); //F2_upper bound
+						Penalty.add(penalty(S1r));
 						F.add((f1(S1r, S2r)- f2(S1r, S2r) + penalty(S1r)));                //F score
 						F_Low.add((f1(S1r, S2r)- M(S1r, S2r, S1rt, S2rt) + penalty(S1r))); //F_lower bound
 					}
@@ -645,7 +651,7 @@ public class RandomGreedy {
 				+ "Sample: 2014-10-21,2,10,0.15,0.015");
 //		Scanner in = new Scanner(System.in);
 //		String input = in.nextLine();
-		String input = "2014-12-10,2,5,0.12,0.015";
+		String input = "2014-10-21,2,5,0.15,0.015";
 		String[] inputs = input.split("\\,");
 
 		day = inputs[0];
@@ -674,7 +680,7 @@ public class RandomGreedy {
 //			System.out.println();
 //			randomGreedy(date);
 //		} while(date.before(dn) && date.after(d0));
-		DrawPlot.draw(F, F_Low,F2, F2_Up);
+		DrawPlot.draw(F, F_Low, F2, F2_Up, F1, Penalty);
 		System.out.println("True subset: "+true_label.toString());
 		pre_recall();
 	}
