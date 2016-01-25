@@ -233,11 +233,6 @@ public class RandomGreedy {
 			randomPermutation();
 			
 			FY = f2(S1rt, S2rt);// will be use in function M and G
-			switch(G_method) {// will be use in function G
-			case 0: GYY = G0(S1rt, S2rt, S1rt, S2rt); break;
-			case 1: GYY = G1(S1rt, S2rt, S1rt, S2rt); break;
-			case 2: GYY = G2(S1rt, S2rt, S1rt, S2rt); break;
-			}
 			for (int i=0; i<random.size(); i++) {
 				ArrayList<String> t = new ArrayList<String>();
 				String e = random.get(i);
@@ -253,11 +248,6 @@ public class RandomGreedy {
 						S1r.add(e);
 						score = y;
 						System.out.println(index++ + ": " +e);
-//						System.out.println("original score: "+ (f1(S1r, S2r)- f2(S1r, S2r) + penalty(S1r)));
-//						System.out.println("lower bound score: "+ score + "\t"+((f1(S1r, S2r)- f2(S1r, S2r) + penalty(S1r))>=score?true:false));
-//						System.out.println("original F2: "+ f2(S1r, S2r));
-//						System.out.println("upper bound MF2: "+ M(S1r, S2r, S1rt, S2rt) + "\t"+(M(S1r, S2r, S1rt, S2rt)>=f2(S1r, S2r)?true:false));
-//						System.out.println();
 						F1.add(f1(S1r, S2r));
 						F2.add(f2(S1r, S2r));                //F2 score
 						F2_Up.add(M(S1r, S2r, S1rt, S2rt));  //F2_upper bound
@@ -276,11 +266,6 @@ public class RandomGreedy {
 						S2r.add(e);
 						score = y;
 						System.out.println(index++ + ": " +e);
-//						System.out.println("original score: "+ (f1(S1r, S2r)- f2(S1r, S2r) + penalty(S1r)));
-//						System.out.println("lower bound score: "+ score + "\t"+((f1(S1r, S2r)- f2(S1r, S2r) + penalty(S1r))>=score?true:false));
-//						System.out.println("original F2: "+ f2(S1r, S2r));
-//						System.out.println("upper bound MF2: "+ M(S1r, S2r, S1rt, S2rt) + "\t"+(M(S1r, S2r, S1rt, S2rt)>=f2(S1r, S2r)?true:false));
-//						System.out.println();
 						F1.add(f1(S1r, S2r));
 						F2.add(f2(S1r, S2r));               //F2 score
 						F2_Up.add(M(S1r, S2r, S1rt, S2rt)); //F2_upper bound
@@ -368,97 +353,11 @@ public class RandomGreedy {
 	// MF2 = GY(S)+F2(Y)-GY(Y)
 	private static double M(ArrayList<String> S1, ArrayList<String> S2, ArrayList<String> S1rt, ArrayList<String> S2rt) {
 		double x = 0;
-		switch(G_method) {
-		case 0: x = FY + G0(S1, S2, S1rt, S2rt)  - GYY; break;
-		case 1: x = FY - G1(S1, S2, S1rt, S2rt) - GYY; break;
-		case 2: x = FY + G2(S1, S2, S1rt, S2rt) - GYY; break;
-		}
+		x = FY + G(S1, S2, S1rt, S2rt);
 		return x;
 	}
 	
-	private static double G0(ArrayList<String> S1, ArrayList<String> S2, ArrayList<String> S1rt, ArrayList<String> S2rt) {
-		double x = 0;
-		ArrayList<String> t = new ArrayList<String>();
-		for (int i=0; i<S1.size(); i++) {
-			String e = S1.get(i);
-			if (S1rt.contains(e)) {
-				x += FV;
-				t.clear();
-				t.addAll(V1);
-				t.remove(e);
-				x -= f2(t, V2);
-			}
-			else {
-				t.clear();
-				t.addAll(S1rt);
-				t.add(e);
-				x += f2(t, S2rt);
-				x -= FY;
-			}
-		}
-		for (int i=0; i<S2.size(); i++) {
-			String e = S2.get(i);
-			if (S2rt.contains(e)) {
-				x += FV;
-				t.clear();
-				t.addAll(V2);
-				t.remove(e);
-				x -= f2(V1, t);
-			}
-			else {
-				t.clear();
-				t.addAll(S2rt);
-				t.add(e);
-				x += f2(S1rt, t);
-				x -= FY;
-			}
-		}
-		return x;
-	}
-	private static double G1(ArrayList<String> S1, ArrayList<String> S2, ArrayList<String> S1rt, ArrayList<String> S2rt) {
-		double x = 0;
-		ArrayList<String> t = new ArrayList<String>();
-		ArrayList<String> s = new ArrayList<String>();
-		s.addAll(S1rt);
-		s.addAll(S2rt);
-		s.removeAll(S1);
-		s.removeAll(S2);
-		for (int i=0; i<s.size(); i++) {
-			String e = s.get(i);
-			if (isUser(e)) {
-				x += FY;
-				t.clear();t.addAll(S1rt);t.remove(e);
-				x -= f2(t, S2rt);
-			}
-			else {
-				x += FY;
-				t.clear();t.addAll(S2rt);t.remove(e);
-				x -= f2(S1rt, t);
-			}
-		}
-		s.clear();
-		s.addAll(S1);
-		s.addAll(S2);
-		s.removeAll(S1rt);
-		s.removeAll(S2rt);
-		ArrayList<String> empty = new ArrayList<String>();
-		empty.clear();
-		for (int i=0; i<s.size(); i++) {
-			String e = s.get(i);
-			if (isUser(e)) {
-				t.clear();t.add(e);
-				x += f2(t, empty);
-				x -= f2(empty, empty);
-			}
-			else {
-				t.clear();t.add(e);
-				x += f2(empty, t);
-				x -= f2(empty, empty);
-			}
-		}
-		return x;
-	}
-	private static double G2(ArrayList<String> S1, ArrayList<String> S2, ArrayList<String> S1rt, ArrayList<String> S2rt) {
+	private static double G(ArrayList<String> S1, ArrayList<String> S2, ArrayList<String> S1rt, ArrayList<String> S2rt) {
 		double x = 0;
 		ArrayList<String> t = new ArrayList<String>();
 		ArrayList<String> s = new ArrayList<String>();
@@ -466,32 +365,29 @@ public class RandomGreedy {
 		for (int i=0; i<s.size(); i++) {
 			String e = s.get(i);
 			if (isUser(e)) {
-				x += FV;
 				t.clear();t.addAll(V1);t.remove(e);
-				x -= f2(t, V2);
+				x += (f2(t, V2) - FV);
 			}
 			else {
-				x += FV;
 				t.clear();t.addAll(V2);t.remove(e);
-				x -= f2(V1, t);
+				x += (f2(V1, t) - FV);
 			}
 		}
 		s.clear();s.addAll(S1);s.addAll(S2);s.removeAll(S1rt);s.removeAll(S2rt);
 		for (int i=0; i<s.size(); i++) {
 			String e = s.get(i);
 			if (isUser(e)) {
-				x -= FY;
 				t.clear();t.addAll(S1rt);t.add(e);
-				x += f2(t, S2rt);
+				x += (f2(t, S2rt) - FY);
 			}
 			else {
-				x -= FY;
 				t.clear();t.addAll(S2rt);t.add(e);
-				x += f2(S1rt, t);
+				x += (f2(S1rt, t) - FY);
 			}
 		}
 		return x;
 	}	
+	
 	// F2 = g(S1,S2)logα - g(S1,S2)log(g(S1,S2)) + (|S1|+|S2|-g(S1,S2))log⁡(1-α) - (|S1|+|S2|-g(S1,S2))log(|S1|+|S2|-g(S1,S2))
 	private static double f2(ArrayList<String> S1, ArrayList<String> S2) {
 		double x = 0;
@@ -602,9 +498,7 @@ public class RandomGreedy {
 				result_prov_List.add((String) entry.getKey());
 		}	
 		rel_ret=interesect(true_label,result_prov_List);
-//		if(rel_ret==0){
-//			rel_ret=0.000001;
-//		}
+		
 		//[0]recall,[1]precision,[2]fscore
 		double rec,pre,fscore;
 		rec=rel_ret/province.size()*1.0;
@@ -649,9 +543,7 @@ public class RandomGreedy {
 	public static void main(String[] args) {
 		System.out.println("date(2014-04-12~2015-01-11), G#(0,1,2), K(int), alpha(0~1), lambda(0~1). "
 				+ "Sample: 2014-10-21,2,10,0.15,0.015");
-//		Scanner in = new Scanner(System.in);
-//		String input = in.nextLine();
-		String input = "2014-10-21,2,5,0.15,0.015";
+		String input = "2014-10-21,2,1,0.15,0.008";
 		String[] inputs = input.split("\\,");
 
 		day = inputs[0];
