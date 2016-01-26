@@ -21,43 +21,76 @@ import java.util.Set;
 
 public class RandomGreedy {
 	
-	static String day;
-	static int G_method = 2;
-	static int K = 10;
-	static double alpha = 0.15;
-	static double lambda = 0.015;
+	public static String day;
+	public static int G_method = 2;
+	public static int K = 10;
+	public static double alpha = 0.15;
+	public static double lambda = 0.015;
 	
-	static Connection conn = null;
-	static double score;
-	static double lastscore;
-	static double[][] pdv;
-	static double FY;
-	static double GYY;
-	static double FV;
-	static ArrayList<String> V1   = new ArrayList<String>();
-	static ArrayList<String> V2   = new ArrayList<String>();
-	static ArrayList<String> S1r  = new ArrayList<String>();
-	static ArrayList<String> S2r  = new ArrayList<String>();
-	static ArrayList<String> S1rt = new ArrayList<String>();
-	static ArrayList<String> S2rt = new ArrayList<String>();
-	static ArrayList<String> random = new ArrayList<String>();
-	static HashMap<String, Integer> u2i = new HashMap<String, Integer>();
-	static HashMap<String, Integer> k2i = new HashMap<String, Integer>();
-	static HashMap<String, String> userLocMap = new HashMap<String, String>();
-	static HashMap<String, String> locMap = new HashMap<String, String>();
-	static HashMap<String, Integer> locNumMap = new HashMap<String, Integer>();
-	static HashMap<String, Integer> locConnNumMap = new HashMap<String, Integer>();
+	public static Connection conn = null;
+	public static double score=0.0D;
+	public static double lastscore=0.0D;
+	public static double[][] pdv=null;
+	public static double FY=0.0D;
+	public static double GYY=0.0D;
+	public static double FV=0.0D;
+	public static ArrayList<String> V1   = null;
+	public static ArrayList<String> V2   = null;
+	public static ArrayList<String> S1r  = null;
+	public static ArrayList<String> S2r  = null;
+	public static ArrayList<String> S1rt = null;
+	public static ArrayList<String> S2rt = null;
+	public static ArrayList<String> random = null;
+	public static HashMap<String, Integer> u2i =null;
+	public static HashMap<String, Integer> k2i = null;
+	public static HashMap<String, String> userLocMap = null;
+	public static HashMap<String, String> locMap = null;
+	public static HashMap<String, Integer> locNumMap = null;
+	public static HashMap<String, Integer> locConnNumMap = null;
 	
-	static ArrayList<String> true_label = new ArrayList<String>();
-	static Map<String, Integer> province = new HashMap<String, Integer>();
-	static ArrayList<String> S_star = new ArrayList<String>();
-	static ArrayList<Double> F1   = new ArrayList<Double>();
-	static ArrayList<Double> F2   = new ArrayList<Double>();
-	static ArrayList<Double> F2_Up= new ArrayList<Double>(); 
-	static ArrayList<Double> Penalty= new ArrayList<Double>();
-	static ArrayList<Double> F   = new ArrayList<Double>();
-	static ArrayList<Double> F_Low= new ArrayList<Double>();
-
+	public static ArrayList<String> true_label = new ArrayList<String>();
+	public static Map<String, Integer> province = new HashMap<String, Integer>();
+	public static ArrayList<String> S_star = new ArrayList<String>();
+	public static ArrayList<Double> F1   = new ArrayList<Double>();
+	public static ArrayList<Double> F2   = new ArrayList<Double>();
+	public static ArrayList<Double> F2_Up= new ArrayList<Double>(); 
+	public static ArrayList<Double> Penalty= new ArrayList<Double>();
+	public static ArrayList<Double> F   = new ArrayList<Double>();
+	public static ArrayList<Double> F_Low= new ArrayList<Double>();
+	public RandomGreedy(String date,int G_num,int k,double alpha_v,double lambda_v){
+		day = date;
+		G_method = G_num;
+		K=k;
+		alpha = alpha_v;
+		lambda = lambda_v;	
+		V1   = new ArrayList<String>();
+		V2   = new ArrayList<String>();
+		S1r  = new ArrayList<String>();
+		S2r  = new ArrayList<String>();
+		S1rt = new ArrayList<String>();
+		S2rt = new ArrayList<String>();
+		random = new ArrayList<String>();
+		u2i = new HashMap<String, Integer>();
+		k2i = new HashMap<String, Integer>();
+		userLocMap = new HashMap<String, String>();
+		locMap = new HashMap<String, String>();
+		locNumMap = new HashMap<String, Integer>();
+		locConnNumMap = new HashMap<String, Integer>();
+		
+		true_label = new ArrayList<String>();
+		province = new HashMap<String, Integer>();
+		S_star = new ArrayList<String>();
+		F1   = new ArrayList<Double>();
+		F2   = new ArrayList<Double>();
+		F2_Up= new ArrayList<Double>(); 
+		Penalty= new ArrayList<Double>();
+		F   = new ArrayList<Double>();
+		F_Low= new ArrayList<Double>();
+		
+		initDB();
+		initLocMap();
+		randomGreedy();
+	}
 //	public static void randomGreedy(Date date) {
 	public static void randomGreedy() {
 //		init(date);
@@ -94,7 +127,7 @@ public class RandomGreedy {
 	 * need to initial your Database's "user" and "password"
 	 */
 	private static void initDB(){
-		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=&useUnicode=true&characterEncoding=UTF8";
+		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=123456&useUnicode=true&characterEncoding=UTF8";
 		try {  
 			Class.forName("com.mysql.jdbc.Driver");  
 			conn = DriverManager.getConnection(url);
@@ -115,7 +148,9 @@ public class RandomGreedy {
 			//init V1, userLocMap, u2i
 			String sql = "select distinct u_id, location from pdven where day = '" + day + "';";	
 			urs = stmt.executeQuery(sql);
-			V1.clear();u2i.clear();userLocMap.clear();
+			V1.clear();
+			u2i.clear();
+			userLocMap.clear();
 			while(urs.next()){
 				user = urs.getString("u_id");
 				loc = urs.getString("location");
@@ -152,7 +187,7 @@ public class RandomGreedy {
 			String prov;
 			while(prs.next()){
 				prov = prs.getString("province");
-				System.out.println(">>> "+prov);
+				//System.out.println(">>> "+prov);
 				true_label.add(prov);
 				
 			}
@@ -224,7 +259,7 @@ public class RandomGreedy {
 		random.addAll(V2);
 		
 		do {
-			System.out.println("r = "+r);
+			System.out.print("r = "+r+" ");
 			r = r + 1;
 			S1rt.clear();
 			S1rt.addAll(S1r);
@@ -247,7 +282,7 @@ public class RandomGreedy {
 					if (x > 0){
 						S1r.add(e);
 						score = y;
-						System.out.println(index++ + ": " +e);
+						//System.out.println(index++ + ": " +e);
 						F1.add(f1(S1r, S2r));
 						F2.add(f2(S1r, S2r));                //F2 score
 						F2_Up.add(M(S1r, S2r, S1rt, S2rt));  //F2_upper bound
@@ -265,7 +300,7 @@ public class RandomGreedy {
 					if (x > 0){
 						S2r.add(e);
 						score = y;
-						System.out.println(index++ + ": " +e);
+						//System.out.println(index++ + ": " +e);
 						F1.add(f1(S1r, S2r));
 						F2.add(f2(S1r, S2r));               //F2 score
 						F2_Up.add(M(S1r, S2r, S1rt, S2rt)); //F2_upper bound
@@ -275,7 +310,7 @@ public class RandomGreedy {
 					}
 				}
 			}
-			System.out.println();
+			//System.out.println();
 			
 		} while (!(compare(S1r, S1rt) && compare(S2r, S2rt)));
 		System.out.println("Complete!!");
@@ -290,25 +325,25 @@ public class RandomGreedy {
 				province.put(prov,1);
 			}
 			
-			System.out.print(userLocMap.get(S1r.get(i)));
-			if(i%5==4)
+			//System.out.print(userLocMap.get(S1r.get(i)));
+			/*if(i%5==4)
 				System.out.println();
 			else{
 				if (userLocMap.get(S1r.get(i)).length()<8)
 					System.out.print("\t");
 				System.out.print("\t");
-			}
+			}*/
 		}
-		if(i%5!=0)
-			System.out.println();
+		//if(i%5!=0)
+		//	System.out.println();
 		province=sortByValue(province);
 		Set<Entry<String, Integer>> entries = province.entrySet();
 		Iterator<Entry<String, Integer>> iter = entries.iterator();
 		
-		while(iter.hasNext()) {
-			Entry entry = iter.next();
-			System.out.println(entry.getKey() + ": " + entry.getValue());
-		}	
+		//while(iter.hasNext()) {
+		//	Entry entry = iter.next();
+			//System.out.println(entry.getKey() + ": " + entry.getValue());
+		//}	
 	}
 	
 	// shuffle the unchosen element to take the next iteration
@@ -423,6 +458,7 @@ public class RandomGreedy {
 		int ui, ki;
 		
 		if (S2.size() > 0) {
+			
 			ui = u2i.get(e);
 			for (int i=0; i<S2.size(); i++) {
 				ki = k2i.get(S2.get(i));
@@ -493,7 +529,7 @@ public class RandomGreedy {
 		
 		int count=0;
 		while(iter.hasNext()) {
-			Entry entry = iter.next();
+			Entry<String, Integer> entry = iter.next();
 			if((int)entry.getValue()>=K)
 				result_prov_List.add((String) entry.getKey());
 		}	
@@ -539,6 +575,7 @@ public class RandomGreedy {
 	    }
 	    return result;
 	}
+	
 	
 	public static void main(String[] args) {
 		System.out.println("date(2014-04-12~2015-01-11), G#(0,1,2), K(int), alpha(0~1), lambda(0~1). "
