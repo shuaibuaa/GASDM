@@ -22,7 +22,6 @@ import java.util.Set;
 public class RandomGreedy {
 	
 	public static String day;
-	public static int G_method = 2;
 	public static int K = 10;
 	public static double alpha = 0.15;
 	public static double lambda = 0.015;
@@ -57,9 +56,9 @@ public class RandomGreedy {
 	public static ArrayList<Double> Penalty= new ArrayList<Double>();
 	public static ArrayList<Double> F   = new ArrayList<Double>();
 	public static ArrayList<Double> F_Low= new ArrayList<Double>();
-	public RandomGreedy(String date,int G_num,int k,double alpha_v,double lambda_v){
+	
+	public RandomGreedy(String date,int k,double alpha_v,double lambda_v){
 		day = date;
-		G_method = G_num;
 		K=k;
 		alpha = alpha_v;
 		lambda = lambda_v;	
@@ -324,26 +323,8 @@ public class RandomGreedy {
 			}else{
 				province.put(prov,1);
 			}
-			
-			//System.out.print(userLocMap.get(S1r.get(i)));
-			/*if(i%5==4)
-				System.out.println();
-			else{
-				if (userLocMap.get(S1r.get(i)).length()<8)
-					System.out.print("\t");
-				System.out.print("\t");
-			}*/
 		}
-		//if(i%5!=0)
-		//	System.out.println();
 		province=sortByValue(province);
-		Set<Entry<String, Integer>> entries = province.entrySet();
-		Iterator<Entry<String, Integer>> iter = entries.iterator();
-		
-		//while(iter.hasNext()) {
-		//	Entry entry = iter.next();
-			//System.out.println(entry.getKey() + ": " + entry.getValue());
-		//}	
 	}
 	
 	// shuffle the unchosen element to take the next iteration
@@ -578,37 +559,21 @@ public class RandomGreedy {
 	
 	
 	public static void main(String[] args) {
-		System.out.println("date(2014-04-12~2015-01-11), G#(0,1,2), K(int), alpha(0~1), lambda(0~1). "
+		System.out.println("date(2014-04-12~2015-01-11), K(int), alpha(0~1), lambda(0~1). "
 				+ "Sample: 2014-10-21,2,10,0.15,0.015");
-		String input = "2014-10-21,2,1,0.15,0.008";
+		String input = "2014-10-21,1,0.15,0.008";
 		String[] inputs = input.split("\\,");
 
 		day = inputs[0];
-		G_method = Integer.parseInt(inputs[1]);
-		K = Integer.parseInt(inputs[2]);
-		alpha = Double.parseDouble(inputs[3]);
-		lambda = Double.parseDouble(inputs[4]);
+		K = Integer.parseInt(inputs[1]);
+		alpha = Double.parseDouble(inputs[2]);
+		lambda = Double.parseDouble(inputs[3]);
 		//link database
 		initDB();
 		//init locMap
 		initLocMap();
 		randomGreedy();
 
-//		Date d0 = new Date(114,9,20);//the day before the beginning day, with format "(year-1900, month-1, date)"
-//		Date dn = new Date(114,9,21);//the day after the ending day
-//		Date date = new Date(114,9,20);
-//		date.setTime(d0.getTime());
-//		//link database
-//		initDB();
-//		//init locMap
-//		initLocMap();
-//		// do random greedy every day
-//		do {
-//			date.setTime(date.getTime()+1000*3600*24);
-//			System.out.println("Year: "+(1900+date.getYear())+" Month: "+(date.getMonth()+1)+" Date: "+date.getDate());
-//			System.out.println();
-//			randomGreedy(date);
-//		} while(date.before(dn) && date.after(d0));
 		DrawPlot.draw(F, F_Low, F2, F2_Up, F1, Penalty);
 		System.out.println("True subset: "+true_label.toString());
 		pre_recall();

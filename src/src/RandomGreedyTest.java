@@ -76,7 +76,7 @@ public class RandomGreedyTest {
 	 * need to initial your Database's "user" and "password"
 	 */
 	private static void initDB(){
-		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=123456&useUnicode=true&characterEncoding=UTF8";
+		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=&useUnicode=true&characterEncoding=UTF8";
 		try {  
 			Class.forName("com.mysql.jdbc.Driver");  
 			conn = DriverManager.getConnection(url);
