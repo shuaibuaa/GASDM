@@ -5,8 +5,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/collections"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/mysqlConnector"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/plot"/>
-	<classpathentry kind="lib" path="D:/Program Files/Java/jdk1.8.0_45/jre/lib/rt.jar"/>
-	<classpathentry kind="lib" path="F:/workspace/git/GASDM/lib/jcommon-1.0.13.jar"/>
-	<classpathentry kind="lib" path="F:/workspace/git/GASDM/lib/jfreechart-1.0.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

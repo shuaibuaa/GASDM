@@ -52,7 +52,7 @@ public class RG_TestForPrediction {
 	          //System.out.println(line);
 	          line = reader.readLine();
 	      }
-	      System.out.println(countDay+"-----"+countDayAll);
+	      //System.out.println(countDay+"-----"+countDayAll);
 	      return results;
 	  }
 	public static String arrayToString(int[] int_vector){
@@ -66,16 +66,16 @@ public class RG_TestForPrediction {
 		// TODO Auto-generated method stub
 		int[] indicatorVector= new int[prov_vector.length];
 		int dayCount=0;
-		ArrayList<String> dayList=readLines("data/days_count.txt",25);
+		ArrayList<String> dayList=readLines("data/days_count.txt",0);
 		BufferedWriter outputWriter = null;
-		  outputWriter = new BufferedWriter(new FileWriter("data/result.txt"));
+		outputWriter = new BufferedWriter(new FileWriter("data/result.txt"));
 		  
-		System.out.println(">>>"+dayList.get(0));
+		//System.out.println(">>>"+dayList.get(0));
 		//String date,int G_num,int k,double alpha_v,double lambda_v
 		for(String date:dayList){
 			RandomGreedy rgTest=null;
-			System.out.println(dayList.size()-dayCount+ "###################"+date+"######################");
-			rgTest=new RandomGreedy(date,2,0,0.15,0.015);
+			System.out.println("["+(dayList.size()-dayCount++)+"]" + "###################"+date+"######################");
+			rgTest=new RandomGreedy(date,0,0.15,0.015);
 			indicatorVector=genIndicatorVector(rgTest.province);
 			outputWriter.write(date+" "+arrayToString(indicatorVector)+"\n");
 			System.out.println(date+" "+arrayToString(indicatorVector));
