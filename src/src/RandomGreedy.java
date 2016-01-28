@@ -26,7 +26,6 @@ public class RandomGreedy {
 	public static double alpha = 0.15;
 	public static double lambda = 0.015;
 	
-	public static Connection conn = null;
 	public static double score=0.0D;
 	public static double lastscore=0.0D;
 	public static double[][] pdv=null;
@@ -86,7 +85,7 @@ public class RandomGreedy {
 		F   = new ArrayList<Double>();
 		F_Low= new ArrayList<Double>();
 		
-		initDB();
+		
 		initLocMap();
 		randomGreedy();
 	}
@@ -122,19 +121,6 @@ public class RandomGreedy {
 		day = yy+"-"+mm+"-"+dd; // to obtain this "day", be useful when visiting databases
 	}
 	
-	/*
-	 * need to initial your Database's "user" and "password"
-	 */
-	private static void initDB(){
-		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=123456&useUnicode=true&characterEncoding=UTF8";
-		try {  
-			Class.forName("com.mysql.jdbc.Driver");  
-			conn = DriverManager.getConnection(url);
-		} catch (Exception e) {  
-			e.printStackTrace();  
-		}
-	}
-	
 	// initial the ground set V, including all users and keywords
 	private static void initV() {
 		Statement stmt;
@@ -143,7 +129,7 @@ public class RandomGreedy {
 		double pvalue;
 		int index = 0;
 		try {
-			stmt = conn.createStatement();
+			stmt = RG_TestForPrediction.conn.createStatement();
 			//init V1, userLocMap, u2i
 			String sql = "select distinct u_id, location from pdven where day = '" + day + "';";	
 			urs = stmt.executeQuery(sql);
@@ -569,7 +555,7 @@ public class RandomGreedy {
 		alpha = Double.parseDouble(inputs[2]);
 		lambda = Double.parseDouble(inputs[3]);
 		//link database
-		initDB();
+		//initDB();
 		//init locMap
 		initLocMap();
 		randomGreedy();

@@ -6,11 +6,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.*;
 import java.util.Map.Entry;
 
 public class RG_TestForPrediction {
 	public static String[] prov_vector={"beijing","tianjin","hebei","henan","shan1xi","shandong","neimenggu","liaoning","jilin","heilongjiang","shan3xi","hubei","hunan","anhui","jiangsu","gansu","ningxia","sichuan","chongqing","jiangxi","zhejiang","shanghai","xinjiang","xizang","yunnan","guangxi","guangdong","qinghai","fujian","guizhou","hainan","xianggang","aomen","taiwan"};
+	public static Connection conn = null;
 	
 	public static int[] genIndicatorVector(Map<String, Integer> S_star){
 		
@@ -56,12 +59,23 @@ public class RG_TestForPrediction {
 	      return results;
 	  }
 	public static String arrayToString(int[] int_vector){
-		String int_String="[";
+		String int_String="[ ";
 		for(int e:int_vector)
 			int_String+=e+" ";
 		int_String+="]";
 		return int_String;
 	}
+	
+	private static void initDB(){
+		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=123456&useUnicode=true&characterEncoding=UTF8";
+		try {  
+			Class.forName("com.mysql.jdbc.Driver");  
+			conn = DriverManager.getConnection(url);
+		} catch (Exception e) {  
+			e.printStackTrace();  
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
 		int[] indicatorVector= new int[prov_vector.length];
@@ -72,10 +86,13 @@ public class RG_TestForPrediction {
 		  
 		//System.out.println(">>>"+dayList.get(0));
 		//String date,int G_num,int k,double alpha_v,double lambda_v
+		
+		initDB();
+		
 		for(String date:dayList){
 			RandomGreedy rgTest=null;
 			System.out.println("["+(dayList.size()-dayCount++)+"]" + "###################"+date+"######################");
-			rgTest=new RandomGreedy(date,0,0.15,0.015);
+			rgTest=new RandomGreedy(date,2,0.15,0.015);
 			indicatorVector=genIndicatorVector(rgTest.province);
 			outputWriter.write(date+" "+arrayToString(indicatorVector)+"\n");
 			System.out.println(date+" "+arrayToString(indicatorVector));
