@@ -300,8 +300,7 @@ public class RandomGreedy {
 		} while (!(compare(S1r, S1rt) && compare(S2r, S2rt)));
 		System.out.println("Complete!!");
 		// when converge, print the result user set to console
-		int i;
-		for (i=0; i<S1r.size(); i++) {
+		for (int i=0; i<S1r.size(); i++) {
 			String prov=userLocMap.get(S1r.get(i));
 			if(province.containsKey(prov)){
 				Integer temp=province.get(prov);

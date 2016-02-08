@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.Time;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -67,7 +68,7 @@ public class RG_TestForPrediction {
 	}
 	
 	private static void initDB(){
-		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=123456&useUnicode=true&characterEncoding=UTF8";
+		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=&useUnicode=true&characterEncoding=UTF8";
 		try {  
 			Class.forName("com.mysql.jdbc.Driver");  
 			conn = DriverManager.getConnection(url);
@@ -75,6 +76,18 @@ public class RG_TestForPrediction {
 			e.printStackTrace();  
 		}
 	}
+	
+	public static String formatFloatNumber(Double value) {
+        if(value != null){
+            if(value.doubleValue() != 0.00){
+                java.text.DecimalFormat df = new java.text.DecimalFormat("###.00");
+                return df.format(value.doubleValue());
+            }else{
+                return "0.00";
+            }
+        }
+        return "";
+    }
 	
 	public static void main(String[] args) throws Exception {
 		// TODO Auto-generated method stub
@@ -87,12 +100,20 @@ public class RG_TestForPrediction {
 		//System.out.println(">>>"+dayList.get(0));
 		//String date,int G_num,int k,double alpha_v,double lambda_v
 		
+		Calendar c1 = Calendar.getInstance();
+		Date start = c1.getTime();
+		
 		initDB();
 		
 		for(String date:dayList){
 			RandomGreedy rgTest=null;
 			System.out.println("["+(dayList.size()-dayCount++)+"]" + "###################"+date+"######################");
 			rgTest=new RandomGreedy(date,2,0.15,0.015);
+			int times=10;
+			while(rgTest.province.size()<4 && times>0){
+				rgTest=new RandomGreedy(date,2,0.15,0.015);
+				times--;
+			}
 			indicatorVector=genIndicatorVector(rgTest.province);
 			outputWriter.write(date+" "+arrayToString(indicatorVector)+"\n");
 			System.out.println(date+" "+arrayToString(indicatorVector));
@@ -100,6 +121,11 @@ public class RG_TestForPrediction {
 		outputWriter.flush();  
 		outputWriter.close();
 		System.out.println("******************* Done **********************");
+		
+		Calendar c2 = Calendar.getInstance();
+		Date end = c2.getTime();
+		end.setTime(end.getTime()-start.getTime());
+		System.out.println("Running Time: "+formatFloatNumber((double)end.getTime()/(3600*1000))+" hours.");
 	}
 
 }
