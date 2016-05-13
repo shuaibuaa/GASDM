@@ -1,4 +1,4 @@
-package src;
+package event;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,6 +11,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import haze.DrawPlot;
 
 public class RandomGreedyEvent {
 	
@@ -134,7 +136,7 @@ public class RandomGreedyEvent {
 		random.addAll(V2);
 		
 		do {
-			System.out.print("r = "+r+" ");
+//			System.out.print("r = "+r+" ");
 			r = r + 1;
 			S1rt.clear();
 			S1rt.addAll(S1r);
@@ -185,18 +187,21 @@ public class RandomGreedyEvent {
 				}
 			}
 		} while (!(compare(S1r, S1rt) && compare(S2r, S2rt)));
-		System.out.println("Complete!!");
+//		System.out.println("Complete!!");
 		// when converge, print the result user set to console
-		System.out.println("users: ");
-		for(String user:S1r){
-			System.out.println(user);
-		}
-		System.out.println("keywords: ");
-		for(String keyword:S2r){
-			System.out.println(keyword);
-		}
-		matchLocation(S1r);
-		matchEvents(S2r);
+//		System.out.println("users: ");
+//		for(String user:S1r){
+//			System.out.println(user);
+//		}
+//		System.out.println("keywords: ");
+//		for(String keyword:S2r){
+//			System.out.println(keyword);
+//		}
+		String loc, event;
+		loc = matchLocation(S1r);
+		event = matchEvents(S2r);
+		if(event.length()>0)
+			System.out.println("["+day+"] "+event);
 	}
 	
 	// shuffle the unchosen element to take the next iteration
@@ -205,7 +210,7 @@ public class RandomGreedyEvent {
 		random.addAll(V1);random.removeAll(S1rt);
 		random.addAll(V2);random.removeAll(S2rt);
 		Collections.shuffle(random);
-		System.out.println("random: " + random.size());
+//		System.out.println("random: " + random.size());
 	}
 	
 	// compare two ArrayList are equal or not
@@ -276,7 +281,7 @@ public class RandomGreedyEvent {
 		return x;
 	}	
 	
-	// F2 = g(S1,S2)logα - g(S1,S2)log(g(S1,S2)) + (|S1|+|S2|-g(S1,S2))log⁡(1-α) - (|S1|+|S2|-g(S1,S2))log(|S1|+|S2|-g(S1,S2))
+	// F2 = g(S1,S2)logα - g(S1,S2)log(g(S1,S2)) + (|S1|+|S2|-g(S1,S2))log�?(1-α) - (|S1|+|S2|-g(S1,S2))log(|S1|+|S2|-g(S1,S2))
 	private static double f2(ArrayList<String> S1, ArrayList<String> S2) {
 		double x = 0;
 		int g = g(S1, S2);
@@ -352,7 +357,7 @@ public class RandomGreedyEvent {
 		return true;
 	}
 	
-	private static void initDB(){
+	public static void initDB(){
 		String url = "jdbc:mysql://localhost:3306/gasdm?user=root&password=&useUnicode=true&characterEncoding=UTF8";
 		try {  
 			Class.forName("com.mysql.jdbc.Driver");  
@@ -371,11 +376,12 @@ public class RandomGreedyEvent {
 		return (double)count/e.length;
 	}
 	
-	private static void matchEvents(ArrayList<String> S2){
-		String[] e1 = {"恐怖","袭击","组织","政府","谴责","炸药","慰问电","遇难者","枪击","紧急状态","恐怖主义","暴力"};
-		String[] e2 = {"核武器","核试验","氢弹","原子弹","试验","核爆","爆炸","核武","核设施","核基地","核计划","核爆炸","核聚变","局势"};
+	private static String matchEvents(ArrayList<String> S2){
+		String event="";
+		String[] e1 = {"恐怖","袭击","组织","政府","谴责","炸药","慰问","遇难","枪击","紧急状态","恐怖主义","暴力"};
+		String[] e2 = {"核武器","核试验","氢弹","原子弹","试验","核爆","爆炸","核武","核设备","核基地","核计划","核爆炸","核聚变","局势"};
 		String[] e3 = {"客轮","调查","渡船","家属","沉船","倾覆","翻船","乘客","遗体","客船","幸存者","天气","救援","轮船"};
-		String[] e4 = {"病例","登革热","登革热病","确诊","死亡","临床","疫情","诊断","病毒","卫生","预防","患者","感染","医院","治疗","蚊虫"};
+		String[] e4 = {"病例","登革热","登革热病","确诊","死亡","临床","疫情","诊断","病毒","卫生","预防","患病","感染","医院","治疗","蚊虫"};
 		String[] e5 = {"滑坡","山体","遇难","现场","救援","目前","塌方","死亡","人数","失踪","人员","房屋","生命","救出","村民","探测","安置",
 				"抢救","群众","事故","警方","被困","灾害","调查组","垮塌","遇难者","安全"};
 		String[] e6 = {"爆炸","现场","氰化物","事故","污染","环境","消防","官兵","超标","公安","火灾","化学","环保","海水","排放","应急","污水",
@@ -397,27 +403,30 @@ public class RandomGreedyEvent {
 		double x[] = {x1,x2,x3,x4,x5,x6,x7,x8,x9};
 		Arrays.sort(x);
 		double max = x[x.length-1];
-		if(max==x1)
-			System.out.println("event: 恐怖袭击");
-		else if(max==x2)
-			System.out.println("event: 核试验");
-		else if(max==x3)
-			System.out.println("event: 沉船事故");
-		else if(max==x4)
-			System.out.println("event: 登革热疫情");
-		else if(max==x5&&S2.contains("滑坡"))
-			System.out.println("event: 山体滑坡");
-		else if(max==x6&&S2.contains("火灾"))
-			System.out.println("event: 火灾爆炸");
-		else if(max==x7)
-			System.out.println("event: 击落战机");
-		else if(max==x8&&S2.contains("踩踏"))
-			System.out.println("event: 踩踏事故");
-		else if(max==x9)
-			System.out.println("event: 钓鱼岛事件");
+		if(max>0.1){
+			if(max==x1)
+				event="恐怖袭击";
+			else if(max==x2)
+				event="核试验";
+			else if(max==x3)
+				event="沉船事故";
+			else if(max==x4)
+				event="登革热疫情";
+			else if(max==x5&&S2.contains("滑坡"))
+				event="山体滑坡";
+			else if(max==x6&&S2.contains("火灾"))
+				event="火灾爆炸";
+			else if(max==x7)
+				event="击落战机";
+			else if(max==x8&&S2.contains("踩踏"))
+				event="踩踏事故";
+			else if(max==x9)
+				event="钓鱼岛事件";
+		}
+		return event;
 	}
 	
-	private static void matchLocation(ArrayList<String> S1){
+	private static String matchLocation(ArrayList<String> S1){
 		Statement stmt;
 		ResultSet rs;
 		HashMap<String, Integer> locNumMap = new HashMap<String, Integer>();
@@ -450,13 +459,13 @@ public class RandomGreedyEvent {
 				resloc = loc;
 			}
 		}
-		System.out.println("location: "+resloc);
+		return resloc;
 	}
 	
 	public static void main(String[] args) {
 		initDB();
-		new RandomGreedyEvent("2015-01-01",1,0.15,0.008);
-		DrawPlot.draw(F, F_Low, F2, F2_Up, F1, Penalty);
+		new RandomGreedyEvent("2014-11-01",1,0.15,0.008);
+		//DrawPlot.draw(F, F_Low, F2, F2_Up, F1, Penalty);
 	}
 
 }
